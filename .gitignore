@@ -1,5 +1,5 @@
 data/
-data-raw/
+data_raw/
 
 # History files
 .Rhistory
