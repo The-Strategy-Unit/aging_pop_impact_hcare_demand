@@ -12,7 +12,7 @@ library("tidyr")
 # functions ----
 # demo_fac
 # hsa_fac
-# hsamd_fac
+# hsa_mode_fac
 
 # demo_fac() ----
 # assemble demographic factors
@@ -112,12 +112,12 @@ hsa_fac <- function(
     mutate(end_p = map2(base_n, end_n, \(x, y) y / x))
 }
 
-# hsamd_fac() ----
+# hsa_mode_fac() ----
 # assemble hsa adjusted modal factors
 # param: proj, type: string, population projection variant to use
 # param: base_year, type: integer, base year for model
 # param: end_year, type: integer, future year to produce activity estimate for
-hsamd_fac <- function(
+hsa_mode_fac <- function(
   area_code,
   proj,
   base_year,
