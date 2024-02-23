@@ -26,6 +26,8 @@ source(here("R", "hsa_run_model.R"))
 # param: end_year, type: integer, future year to produce activity estimate for
 demo_fac <- function(area_code, proj, base_year, end_year) {
 
+  path_self <- path_closure({{area_code}}, {{base_year}})
+
   act <- load_activity_data(path_self, activity_type = "all")
 
   demo <- load_demographic_factors(path_self, base_year, end_year)
