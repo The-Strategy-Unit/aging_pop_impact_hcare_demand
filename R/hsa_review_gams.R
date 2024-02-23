@@ -8,6 +8,7 @@ library("ggplot2")
 library("here")
 library("mgcv")
 library("patchwork")
+library("purrr")
 library("readr")
 library("tidyr")
 
