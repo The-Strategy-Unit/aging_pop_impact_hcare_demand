@@ -22,6 +22,8 @@ source(here("R", "helper_theme_1045.R"))
 # returns: plot of gams fit, rtype: ggplot object
 review_gams <- function(area_code, base_year) {
 
+  path_self <- path_closure({{area_code}}, {{base_year}})
+
   gams <- read_rds(path_self("hsa_gams.rds"))
 
   gams <- gams |>

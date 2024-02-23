@@ -21,9 +21,9 @@ library("tidyr")
 # param: end_year, type: integer, future year to produce activity estimate for
 demo_fac <- function(proj, start_year, end_year) {
 
-  act <- load_activity_data(activity_type = "all")
+  act <- load_activity_data(path_self, activity_type = "all")
 
-  demo <- load_demographic_factors(start_year, end_year)
+  demo <- load_demographic_factors(path_self, start_year, end_year)
   demo <- demo |>
     filter(id == {{ proj }})
 
@@ -45,6 +45,7 @@ demo_fac <- function(proj, start_year, end_year) {
 # returns: a datframe of modeled activity numbers and per cent change from start
 # year by hsagrp and sex, rtype: rtype: df (vector columns)
 hsa_fac <- function(
+  area_code,
   proj,
   start_year,
   end_year,
@@ -55,6 +56,8 @@ hsa_fac <- function(
 
   # check method argument
   method <- rlang::arg_match(method)
+
+  path_self <- path_closure({{area_code}}, {{start_year}})
 
   omit_grps <- c(
     "apc_birth_n",
@@ -70,13 +73,14 @@ hsa_fac <- function(
     "apc_xfer_bds"
   )
 
-  act <- load_activity_data(activity_type = "all")
+  act <- load_activity_data(path_self, activity_type = "all")
 
-  demo <- load_demographic_factors(start_year, end_year)
+  demo <- load_demographic_factors(path_self, start_year, end_year)
   demo <- demo |>
     filter(id == {{ proj }})
 
   hsa <- run_hsa(
+    area_code,
     proj,
     start_year,
     end_year,
@@ -114,6 +118,7 @@ hsa_fac <- function(
 # param: start_year, type: integer, base year for model
 # param: end_year, type: integer, future year to produce activity estimate for
 hsamd_fac <- function(
+  area_code,
   proj,
   start_year,
   end_year,
@@ -122,6 +127,8 @@ hsamd_fac <- function(
 
   # check method argument
   method <- rlang::arg_match(method)
+
+  path_self <- path_closure({{area_code}}, {{start_year}})
 
   omit_grps <- c(
     "apc_birth_n",
@@ -137,13 +144,13 @@ hsamd_fac <- function(
     "apc_xfer_bds"
   )
 
-  act <- load_activity_data(activity_type = "all")
+  act <- load_activity_data(path_self, activity_type = "all")
 
-  demo <- load_demographic_factors(start_year, end_year)
+  demo <- load_demographic_factors(path_self, start_year, end_year)
   demo <- demo |>
     filter(id == {{ proj }})
 
-  hsa <- run_hsa_mode(proj, start_year, end_year, method = method)
+  hsa <- run_hsa_mode(area_code, proj, start_year, end_year, method = method)
 
   act |>
     left_join(demo, join_by("sex", "age")) |>

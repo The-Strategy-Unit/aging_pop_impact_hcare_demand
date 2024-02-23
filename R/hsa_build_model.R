@@ -51,7 +51,7 @@ load_proj_lookup <- function() {
 # param: start_year, type: int, start year for change factors
 # param: end_year, type: int, end year for change factors
 # returns: a dataframe of demographic change factors, rtype: df
-load_demographic_factors <- function(start_year, end_year) {
+load_demographic_factors <- function(path_self, start_year, end_year) {
 
   lookup_proj <- load_proj_lookup()
 
@@ -157,7 +157,7 @@ create_hsa_mode <- function(end_year, var) {
 # load activity data
 # param: activity_type, type: string, either 'all', 'aae', 'apc' or 'opc'
 # returns: a dataframe of activity data, rtype: df
-load_activity_data <- function(activity_type = c("all", "aae", "apc", "opc")) {
+load_activity_data <- function(path_self, activity_type = c("all", "aae", "apc", "opc")) {
 
   # check activity_type argument
   activity_type <- rlang::arg_match(activity_type)
@@ -176,7 +176,7 @@ load_activity_data <- function(activity_type = c("all", "aae", "apc", "opc")) {
 
 # load_activity_rt_tbl() ----
 # load predicted activity rates from gams
-load_activity_rt_tbl <- function() {
+load_activity_rt_tbl <- function(path_self) {
   read_csv(path_self("hsa_activity_rt_tbl.csv"), show_col_types = FALSE)
 }
 
@@ -188,7 +188,7 @@ load_activity_rt_tbl <- function() {
 # returns: a list of predicted activity rates for supplied adjusted ages,
 # rtype: list of 2(f/m), list of 16 (hsagrps), list of 36 (ages 55-90), vector
 # (length = model runs)
-predict_activity_gam <- function(adjusted_ages) {
+predict_activity_gam <- function(path_self, adjusted_ages) {
 
   gams <- read_rds(path_self("hsa_gams.rds"))
   gams <- gams |>
@@ -220,9 +220,9 @@ predict_activity_gam <- function(adjusted_ages) {
 # returns: a list of predicted activity rates for supplied adjusted ages,
 # rtype: list of 2(f/m), list of 16 (hsagrps), list of 36 (ages 55-90), vector
 # (length = model runs)
-predict_activity_interpolate <- function(adjusted_ages) {
+predict_activity_interpolate <- function(path_self, adjusted_ages) {
 
-  act_df <- load_activity_rt_tbl() |>
+  act_df <- load_activity_rt_tbl(path_self) |>
     group_by(hsagrp, sex) |>
     nest(.key = "data") |>
     mutate(

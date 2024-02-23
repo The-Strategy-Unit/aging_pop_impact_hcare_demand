@@ -41,7 +41,12 @@ path_closure <- function(area_code, base_year) {
 # param: omit_hsagrps, type: string vector, activity groups to omit from
 # health status adjustment
 # returns: dataframe of gams for a single activity type, rtype: df
-create_activity_type_gams <- function(activity_type, pop_df, omit_hsagrps) {
+create_activity_type_gams <- function(
+  path_self,
+  activity_type,
+  pop_df,
+  omit_hsagrps
+) {
 
   act_df <- read_rds(path_self(filename = paste0(activity_type, "_clean.rds")))
 
@@ -113,6 +118,8 @@ create_activity_rt_tbl <- function(filename, gams) {
 # returns: dataframe of gams for all activity types, rtype: df
 create_gams <- function(area_code, base_year) {
 
+  path_self <- path_closure({{area_code}}, {{base_year}})
+
   # load the population data
   pop_df <- read_rds(path_self(filename = "pop_dat.rds"))
   pop_df <- pop_df |>
@@ -143,6 +150,7 @@ create_gams <- function(area_code, base_year) {
     mutate(
       gams = map2(key, omit, \(x, y) {
         create_activity_type_gams(
+          path_self,
           activity_type = x,
           pop_df,
           omit_hsagrps = y
@@ -162,6 +170,8 @@ create_gams <- function(area_code, base_year) {
 # param: base_year, type: int, model baseline year
 # returns: the filename where the gams have been saved to, rtype: string
 run_gams <- function(area_code, base_year) {
+
+  path_self <- path_closure({{area_code}}, {{base_year}})
 
   gams <- create_gams(area_code, base_year)
   filename <- path_self("hsa_gams.rds")

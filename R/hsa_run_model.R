@@ -11,6 +11,9 @@ library("readr")
 library("rlang")
 library("tidyr")
 
+# helpers ----
+source(here("R", "hsa_build_model.R"))
+
 # functions ----
 # run_hsa
 # run_hsa_mode
@@ -26,6 +29,7 @@ library("tidyr")
 # gams or use the gams to predict activity, 'gams' will be slower
 # returns: a dataframe of hsa factors, rtype: df (list column)
 run_hsa <- function(
+  area_code,
   proj,
   start_year,
   end_year,
@@ -36,6 +40,8 @@ run_hsa <- function(
 
   # check method argument
   method <- rlang::arg_match(method)
+
+  path_self <- path_closure({{area_code}}, {{start_year}})
 
   # load life table lookup
   load_proj_lookup()
@@ -71,7 +77,7 @@ run_hsa <- function(
     })
   })
 
-  chron_age_rts <- load_activity_rt_tbl()
+  chron_age_rts <- load_activity_rt_tbl(path_self)
 
   chron_age_rts <- split(
     chron_age_rts |>
@@ -80,9 +86,9 @@ run_hsa <- function(
   )
 
   if (method == "gams") {
-    p <- predict_activity_gam(adjusted_ages)
+    p <- predict_activity_gam(path_self, adjusted_ages)
   } else {
-    p <- predict_activity_interpolate(adjusted_ages)
+    p <- predict_activity_interpolate(path_self, adjusted_ages)
   }
 
   f <- chron_age_rts$f |>
@@ -115,6 +121,7 @@ run_hsa <- function(
 # gams or use the gams to predict activity, 'gams' will be slower
 # returns: a dataframe of hsa factors, rtype: df (vector column)
 run_hsa_mode <- function(
+  area_code,
   proj,
   start_year,
   end_year,
@@ -123,6 +130,8 @@ run_hsa_mode <- function(
 
   # check method argument
   method <- rlang::arg_match(method)
+
+  path_self <- path_closure({{area_code}}, {{start_year}})
 
   # load life table lookup
   load_proj_lookup()
@@ -153,7 +162,7 @@ run_hsa_mode <- function(
     })
   })
 
-  chron_age_rts <- load_activity_rt_tbl()
+  chron_age_rts <- load_activity_rt_tbl(path_self)
 
   chron_age_rts <- split(
     chron_age_rts |>
@@ -162,9 +171,9 @@ run_hsa_mode <- function(
   )
 
   if (method == "gams") {
-    p <- predict_activity_gam(adjusted_ages)
+    p <- predict_activity_gam(path_self, adjusted_ages)
   } else {
-    p <- predict_activity_interpolate(adjusted_ages)
+    p <- predict_activity_interpolate(path_self, adjusted_ages)
   }
 
   f <- chron_age_rts$f |>
