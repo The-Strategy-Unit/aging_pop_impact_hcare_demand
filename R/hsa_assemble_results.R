@@ -19,7 +19,7 @@ library("tidyr")
 # param: proj, type: string, population projection variant to use
 # param: base_year, type: integer, base year for model
 # param: end_year, type: integer, future year to produce activity estimate for
-demo_fac <- function(proj, base_year, end_year) {
+demo_fac <- function(area_code, proj, base_year, end_year) {
 
   act <- load_activity_data(path_self, activity_type = "all")
 
