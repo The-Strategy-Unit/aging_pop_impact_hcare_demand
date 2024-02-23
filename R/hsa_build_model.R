@@ -48,15 +48,15 @@ load_proj_lookup <- function() {
 # load_demographic_factors() ----
 # load population data and calculate demographic change factors
 # change factors are returned for all variants
-# param: start_year, type: int, start year for change factors
+# param: base_year, type: int, base year for change factors
 # param: end_year, type: int, end year for change factors
 # returns: a dataframe of demographic change factors, rtype: df
-load_demographic_factors <- function(path_self, start_year, end_year) {
+load_demographic_factors <- function(path_self, base_year, end_year) {
 
   lookup_proj <- load_proj_lookup()
 
   read_rds(path_self("pop_dat.rds")) |>
-    mutate(demo_adj = !!as.name(end_year) / !!as.name(start_year)) |>
+    mutate(demo_adj = !!as.name(end_year) / !!as.name(base_year)) |>
     select(id, sex, age, demo_adj) |>
     left_join(lookup_proj, join_by("id" == "proj_id"))
 }
@@ -64,10 +64,10 @@ load_demographic_factors <- function(path_self, start_year, end_year) {
 # load_life_expectancy_series() ----
 # load life expectancy data and calculate change
 # changes are returned for all variants
-# param: start_year, type: int, start year for change
+# param: base_year, type: int, base year for change
 # param: end_year, type: int, end year for change
 # returns: a dataframe of life expectancy changes, rtype: df
-load_life_expectancy_series <- function(start_year, end_year) {
+load_life_expectancy_series <- function(base_year, end_year) {
 
   # age range for health status adjustment
   hsa_age_range <- seq.int(55, 90)
@@ -81,10 +81,10 @@ load_life_expectancy_series <- function(start_year, end_year) {
     )
 
   ex_dat |>
-    filter(year %in% c({{ start_year }}, {{ end_year }})) |>
+    filter(year %in% c({{ base_year }}, {{ end_year }})) |>
     group_by(var, sex, age) |>
     pivot_wider(names_from = year, values_from = ex) |>
-    summarise(ex_chg = !!as.name(end_year) - !!as.name(start_year)) |>
+    summarise(ex_chg = !!as.name(end_year) - !!as.name(base_year)) |>
     ungroup()
 }
 

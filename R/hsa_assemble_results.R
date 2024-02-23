@@ -17,13 +17,13 @@ library("tidyr")
 # demo_fac() ----
 # assemble demographic factors
 # param: proj, type: string, population projection variant to use
-# param: start_year, type: integer, base year for model
+# param: base_year, type: integer, base year for model
 # param: end_year, type: integer, future year to produce activity estimate for
-demo_fac <- function(proj, start_year, end_year) {
+demo_fac <- function(proj, base_year, end_year) {
 
   act <- load_activity_data(path_self, activity_type = "all")
 
-  demo <- load_demographic_factors(path_self, start_year, end_year)
+  demo <- load_demographic_factors(path_self, base_year, end_year)
   demo <- demo |>
     filter(id == {{ proj }})
 
@@ -31,23 +31,23 @@ demo_fac <- function(proj, start_year, end_year) {
     left_join(demo, join_by("sex", "age")) |>
     mutate(end_n = n * demo_adj) |>
     group_by(id, hsagrp, sex) |>
-    summarise(start_n = sum(n), end_n = sum(end_n)) |>
+    summarise(base_n = sum(n), end_n = sum(end_n)) |>
     ungroup() |>
-    mutate(end_p = end_n / start_n) |>
+    mutate(end_p = end_n / base_n) |>
     arrange(hsagrp, sex)
 }
 
 # hsa_fac() ----
 # assemble hsa adjusted factors
 # param: proj, type: string, population projection variant to use
-# param: start_year, type: integer, base year for model
+# param: base_year, type: integer, base year for model
 # param: end_year, type: integer, future year to produce activity estimate for
-# returns: a datframe of modeled activity numbers and per cent change from start
+# returns: a datframe of modeled activity numbers and per cent change from base
 # year by hsagrp and sex, rtype: rtype: df (vector columns)
 hsa_fac <- function(
   area_code,
   proj,
-  start_year,
+  base_year,
   end_year,
   model_runs,
   rng_state,
@@ -57,7 +57,7 @@ hsa_fac <- function(
   # check method argument
   method <- rlang::arg_match(method)
 
-  path_self <- path_closure({{area_code}}, {{start_year}})
+  path_self <- path_closure({{area_code}}, {{base_year}})
 
   omit_grps <- c(
     "apc_birth_n",
@@ -75,14 +75,14 @@ hsa_fac <- function(
 
   act <- load_activity_data(path_self, activity_type = "all")
 
-  demo <- load_demographic_factors(path_self, start_year, end_year)
+  demo <- load_demographic_factors(path_self, base_year, end_year)
   demo <- demo |>
     filter(id == {{ proj }})
 
   hsa <- run_hsa(
     area_code,
     proj,
-    start_year,
+    base_year,
     end_year,
     model_runs,
     rng_state,
@@ -106,21 +106,21 @@ hsa_fac <- function(
     group_by(hsagrp, sex) |>
     nest(.key = "data") |>
     ungroup() |>
-    mutate(start_n = map_dbl(data, \(x) sum(x$n))) |>
+    mutate(base_n = map_dbl(data, \(x) sum(x$n))) |>
     mutate(end_n = map(data, \(x) rowSums(sapply(x$end_n, unlist)))) |>
-    select(hsagrp, sex, start_n, end_n) |>
-    mutate(end_p = map2(start_n, end_n, \(x, y) y / x))
+    select(hsagrp, sex, base_n, end_n) |>
+    mutate(end_p = map2(base_n, end_n, \(x, y) y / x))
 }
 
 # hsamd_fac() ----
 # assemble hsa adjusted modal factors
 # param: proj, type: string, population projection variant to use
-# param: start_year, type: integer, base year for model
+# param: base_year, type: integer, base year for model
 # param: end_year, type: integer, future year to produce activity estimate for
 hsamd_fac <- function(
   area_code,
   proj,
-  start_year,
+  base_year,
   end_year,
   method = c("interp", "gams")
 ) {
@@ -128,7 +128,7 @@ hsamd_fac <- function(
   # check method argument
   method <- rlang::arg_match(method)
 
-  path_self <- path_closure({{area_code}}, {{start_year}})
+  path_self <- path_closure({{area_code}}, {{base_year}})
 
   omit_grps <- c(
     "apc_birth_n",
@@ -146,11 +146,11 @@ hsamd_fac <- function(
 
   act <- load_activity_data(path_self, activity_type = "all")
 
-  demo <- load_demographic_factors(path_self, start_year, end_year)
+  demo <- load_demographic_factors(path_self, base_year, end_year)
   demo <- demo |>
     filter(id == {{ proj }})
 
-  hsa <- run_hsa_mode(area_code, proj, start_year, end_year, method = method)
+  hsa <- run_hsa_mode(area_code, proj, base_year, end_year, method = method)
 
   act |>
     left_join(demo, join_by("sex", "age")) |>
@@ -161,7 +161,7 @@ hsamd_fac <- function(
     mutate(end_n = n * f) |>
     select(hsagrp, sex, age, n, end_n) |>
     group_by(hsagrp, sex) |>
-    summarise(start_n = sum(n), end_n = sum(end_n)) |>
+    summarise(base_n = sum(n), end_n = sum(end_n)) |>
     ungroup() |>
-    mutate(end_p = end_n / start_n)
+    mutate(end_p = end_n / base_n)
 }

@@ -21,7 +21,7 @@ source(here("R", "hsa_build_model.R"))
 # run_hsa() ----
 # run the health status adjustment model
 # param: proj, type: string, population projection variant to use
-# param: start_year, type: integer, base year for model
+# param: base_year, type: integer, base year for model
 # param: end_year, type: integer, future year to produce activity estimate for
 # param: model_runs, type: integer, number of times to run model
 # param: rng_state, type: integer vector, RNG state
@@ -31,7 +31,7 @@ source(here("R", "hsa_build_model.R"))
 run_hsa <- function(
   area_code,
   proj,
-  start_year,
+  base_year,
   end_year,
   model_runs,
   rng_state,
@@ -41,7 +41,7 @@ run_hsa <- function(
   # check method argument
   method <- rlang::arg_match(method)
 
-  path_self <- path_closure({{area_code}}, {{start_year}})
+  path_self <- path_closure({{area_code}}, {{base_year}})
 
   # load life table lookup
   load_proj_lookup()
@@ -50,7 +50,7 @@ run_hsa <- function(
     filter(proj_id == {{ proj }}) |>
     pull(ex_id)
 
-  ex_chg <- load_life_expectancy_series(start_year, end_year)
+  ex_chg <- load_life_expectancy_series(base_year, end_year)
   ex_chg <- split(
     ex_chg |>
       filter(var == ex_id),
@@ -115,7 +115,7 @@ run_hsa <- function(
 # run_hsa_mode() ----
 # run the model to return only the modal estimate
 # param: proj, type: string, population projection variant to use
-# param: start_year, type: integer, base year for model
+# param: base_year, type: integer, base year for model
 # param: end_year, type: integer, future year to produce activity estimate for
 # param: method, type: string, either 'interp' or 'gams', interpolate from the
 # gams or use the gams to predict activity, 'gams' will be slower
@@ -123,7 +123,7 @@ run_hsa <- function(
 run_hsa_mode <- function(
   area_code,
   proj,
-  start_year,
+  base_year,
   end_year,
   method = c("interp", "gams")
 ) {
@@ -131,7 +131,7 @@ run_hsa_mode <- function(
   # check method argument
   method <- rlang::arg_match(method)
 
-  path_self <- path_closure({{area_code}}, {{start_year}})
+  path_self <- path_closure({{area_code}}, {{base_year}})
 
   # load life table lookup
   load_proj_lookup()
@@ -140,7 +140,7 @@ run_hsa_mode <- function(
     filter(proj_id == {{ proj }}) |>
     pull(ex_id)
 
-  ex_chg <- load_life_expectancy_series(start_year, end_year)
+  ex_chg <- load_life_expectancy_series(base_year, end_year)
   ex_chg <- split(
     ex_chg |>
       filter(var == ex_id),
