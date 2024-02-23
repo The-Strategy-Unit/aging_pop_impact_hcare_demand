@@ -12,6 +12,7 @@ library("rlang")
 library("tidyr")
 
 # helpers ----
+source(here("R", "helper_utility_fns.R"))
 source(here("R", "hsa_build_model.R"))
 
 # functions ----

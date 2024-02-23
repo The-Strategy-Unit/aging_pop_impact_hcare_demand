@@ -17,22 +17,14 @@ library("purrr")
 library("readr")
 library("tidyr")
 
+# helpers
+source(here("R", "helper_utility_fns.R"))
+
 # functions -----
-# path_closure
 # create_activity_type_gams
 # create_activity_rt_tbl
 # create_gams
 # run_gams
-
-# path_closure() ----
-# helper function (closure) for paths
-# param: area_code, type: string, local authority code
-# param: base_year, type: int, model baseline year
-path_closure <- function(area_code, base_year) {
-  function(filename) {
-    here("data", base_year, area_code, filename)
-  }
-}
 
 # create_activity_type_gams() ----
 # helper function for creating gams
