@@ -15,13 +15,11 @@ library("stringr")
 library("tidyr")
 library("testthat")
 
+
 # create custom variants ----
 custom_vars_snpp <- function(npp, snpp) {
   npp_dat <- read_rds(here("data", npp))
   snpp_dat <- read_rds(here("data", snpp))
-
-  npp_dat <- read_rds(here("data", "npp_2018b.rds"))
-  snpp_dat <- read_rds(here("data", "snpp_2018b.rds"))
 
   ref <- npp_dat |>
     filter(year %in% as.character(2018:2043)) |> # snpp end at 2043
