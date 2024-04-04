@@ -12,20 +12,22 @@ proj_lookup  <- read_csv(here("data", "lookup_proj_vars.csv"))
 rng_year <- sample(seq(2019, 2043), size = 1L)
 test_yr <- as.character(rng_year)
 
+# no ppp
 cus_rnk <- custom |>
   filter(str_detect(area_code, "^E10", negate = TRUE)) |>
   filter(year == test_yr) |>
   group_by(area_code, area_name, id) |>
   summarise(pop = sum(pop)) |>
-  arrange(pop) |>
-  mutate(cus_rnk = row_number())
+  arrange(pop, .by_group = TRUE) |>
+  mutate(cus_rnk = row_number()) |>
+  ungroup()
 
+# rm ppp
 npp_rnk <- npp_dat |>
-  filter(year == test_yr) |>
+  filter(year == test_yr, id != "ppp") |>
   group_by(id) |>
   summarise(pop = sum(pop)) |>
-  ungroup() |>
-  arrange(pop) |>
+  arrange(pop, .by_group = TRUE) |>
   mutate(npp_rnk = row_number()) |>
   select(id, npp_rnk)
 
