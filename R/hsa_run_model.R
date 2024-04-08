@@ -10,6 +10,8 @@ library("purrr")
 library("readr")
 library("rlang")
 library("tidyr")
+options(dplyr.summarise.inform = FALSE)
+options(readr.show_progress = FALSE)
 
 # helpers ----
 source(here("R", "helper_utility_fns.R"))

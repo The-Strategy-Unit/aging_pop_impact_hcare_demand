@@ -11,6 +11,8 @@ library("purrr")
 library("readr")
 library("rlang")
 library("tidyr")
+options(dplyr.summarise.inform = FALSE)
+options(readr.show_progress = FALSE)
 
 # helpers ----
 source(here("R", "helper_utility_fns.R"))
@@ -128,7 +130,10 @@ random_split_norm <- function(n, mode, sd1, sd2, rng_state) {
 # (females and males), length = model_runs
 create_hsa_params <- function(end_year, var, model_runs, rng_state) {
 
-  sp_norm_params <- read_csv(path_data("split_normal_parameters.csv")) |>
+  sp_norm_params <- read_csv(
+    path_data("split_normal_parameters.csv"),
+    show_col_types = FALSE
+  ) |>
     filter(year == {{ end_year }}, var == {{ var }})
 
   pmap(
@@ -147,7 +152,10 @@ create_hsa_params <- function(end_year, var, model_runs, rng_state) {
 # (females and males), length = 1
 create_hsa_mode <- function(end_year, var) {
 
-  sp_norm_params <- read_csv(path_data("split_normal_parameters.csv")) |>
+  sp_norm_params <- read_csv(
+    path_data("split_normal_parameters.csv"),
+    show_col_types = FALSE
+  ) |>
     filter(year == {{ end_year }}, var == {{ var }})
 
   map(sp_norm_params$mode, \(x) x)
