@@ -47,7 +47,7 @@ run_hsa <- function(
   path_self <- path_closure({{area_code}}, {{base_year}})
 
   # load life table lookup
-  load_proj_lookup()
+  # load_proj_lookup()
 
   ex_id <- lookup_proj |>
     filter(proj_id == {{ proj }}) |>
@@ -137,7 +137,7 @@ run_hsa_mode <- function(
   path_self <- path_closure({{area_code}}, {{base_year}})
 
   # load life table lookup
-  load_proj_lookup()
+  # load_proj_lookup()
 
   ex_id <- lookup_proj |>
     filter(proj_id == {{ proj }}) |>

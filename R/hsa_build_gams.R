@@ -48,7 +48,7 @@ create_activity_type_gams <- function(
 
   # turn implicit missing age values into explicit missing age values
   act_df <- act_df |>
-    group_by(hsagrp, sex, age) |>
+    group_by(area_code, hsagrp, sex, age) |>
     summarise(across(n, sum)) |>
     ungroup() |>
     complete(nesting(hsagrp, sex), age = 0:90) |>
@@ -65,7 +65,7 @@ create_activity_type_gams <- function(
 
   # create gams
   gams <- act_df |>
-    group_by(hsagrp, sex) |>
+    group_by(area_code, hsagrp, sex) |>
     nest(data = c("age", "n", "base_year", "rt")) |>
     mutate(
       gams = map(data, \(x) {
@@ -78,7 +78,7 @@ create_activity_type_gams <- function(
       })
     ) |>
     ungroup() |>
-    select(hsagrp, sex, data, gams)
+    select(area_code, hsagrp, sex, data, gams)
 }
 
 # create_activity_rt_tbl() ----
@@ -98,7 +98,7 @@ create_activity_rt_tbl <- function(filename, gams) {
         as.vector(mgcv::predict.gam(x, y))
       })
     ) |>
-    select(hsagrp, sex, age, gam_rt) |>
+    select(area_code, hsagrp, sex, age, gam_rt) |>
     unnest(c(age, gam_rt)) |>
     write_csv(filename)
 }

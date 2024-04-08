@@ -55,7 +55,7 @@ load_proj_lookup <- function() {
 # returns: a dataframe of demographic change factors, rtype: df
 load_demographic_factors <- function(path_self, base_year, end_year) {
 
-  lookup_proj <- load_proj_lookup()
+  # lookup_proj <- load_proj_lookup()
 
   read_rds(path_self("pop_dat.rds")) |>
     mutate(demo_adj = !!as.name(end_year) / !!as.name(base_year)) |>
