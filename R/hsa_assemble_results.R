@@ -30,6 +30,20 @@ demo_fac <- function(area_code, proj, base_year, end_year) {
 
   path_self <- path_closure({{area_code}}, {{base_year}})
 
+  omit_grps <- c(
+    "apc_birth_n",
+    "apc_birth_bds",
+    "apc_mat_n",
+    "apc_mat_bds",
+    "apc_paeds-elec_n",
+    "apc_paeds-elec_bds",
+    "apc_paeds-emer_n",
+    "apc_paeds-emer_bds",
+    "apc_reg_n",
+    "apc_xfer_n",
+    "apc_xfer_bds"
+  )
+
   act <- load_activity_data(path_self, activity_type = "all")
 
   demo <- load_demographic_factors(path_self, base_year, end_year)
@@ -38,6 +52,7 @@ demo_fac <- function(area_code, proj, base_year, end_year) {
 
   act |>
     left_join(demo, join_by("sex", "age")) |>
+    filter(!hsagrp %in% omit_grps) |>
     mutate(end_n = n * demo_adj) |>
     group_by(id, hsagrp, sex) |>
     summarise(base_n = sum(n), end_n = sum(end_n)) |>
