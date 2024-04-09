@@ -124,6 +124,13 @@ grp_sex_demo <- function(df) {
     summarise(end_p_nohsa = sum(end_n) / sum(base_n))
 }
 
+grp_sex_hsa_mode <- function(df) {
+  df |>
+    select(-end_p) |>
+    group_by(hsagrp) |>
+    summarise(end_p_md = sum(end_n) / sum(base_n))
+}
+
 # attach parameters to model results
 attach_params <- function(df) {
   pmap(
