@@ -5,6 +5,7 @@
 # packages ----
 library("dplyr")
 library("here")
+library("jsonlite")
 library("purrr")
 library("readr")
 library("stringr")
@@ -17,87 +18,82 @@ source(here("R", "helper_app_inputs.R"))
 pop_dat <- read_rds(here("data", "app_pop_100_inputs.rds"))
 
 # assemble ----
-# switch to German variable names
-age_levels <- str_c("Bev_", 0:100, "_", 0:100 + 1)
-
 app_dat <- pop_dat |>
-  rename(Variante = id, mw = sex, Simulationsjahr = year) |>
+  filter(id %in% vars_app) |>
+  rename(variant = id, mf = sex) |>
   mutate(
-    age = str_c("Bev_", age, "_", age + 1),
-    age = factor(age, levels = age_levels)
+    variant = factor(variant, levels = vars_levels),
+    variant = paste0("v", as.integer(variant)),
+    # round population to integer
+    pop = round(pop)
   ) |>
-  mutate(mw = case_match(mw, "f" ~ "w", .default = "m")) |>
-  group_by(area_code, area_name, Variante, mw, age) |>
-  pivot_wider(names_from = "age", values_from = "pop") |>
-  ungroup() |>
-  mutate(Bev = rowSums(pick(starts_with("Bev"))), .before = Bev_0_1) |>
-  arrange(area_code, area_name, Variante, Simulationsjahr, mw)
-
-# filter on variants
-app_dat <- app_dat |>
-  filter(area_code %in% test_areas) |>
-  filter(Variante %in% vars_app) |>
-  mutate(Variante = factor(Variante, levels = vars_levels)) |>
-  mutate(Variante = as.integer(Variante)) |>
-  arrange(area_code, area_name, Variante)
+  # important
+  arrange(area_code, area_name, variant, year, age)
 
 # repeat years
-# 1) I'm creating a new variant (numbered zero) that has population numbers for
-# 2010 to 2017 - these are historic so just one set (no variants), repeats the
-# numbers from 2018
-# 2) I'm adding rows to all variants for 2044 to 2050 that repeat the numbers
-# from 2043
-rep_years <- function(df) {
-  df_start <- df |>
-    filter(Simulationsjahr == 2018L, Variante == 1L)
+# I'm creating a new variant v0 that has population numbers for
+# 2010 to 2017. These data are historic so there are no variants
+# Currently, I just duplicate 2018 data as a temporary placeholder
+# This will need updating with the true population numbers
+rep_years <- function(df, start = 2010, end = 2017) {
+  base_dat <- df |>
+    filter(year == 2018L, variant == "v1")
 
-  # repeating 8 years
-  df_start <- map(seq_len(8), ~ df_start) |>
-    list_rbind() |>
-    arrange(area_code, area_name) |>
-    group_by(area_code, area_name) |>
-    # repeating 8 years x 2 sexes
-    slice(1:16) |>
-    mutate(Simulationsjahr = rep(2010:2017, each = 2)) |>
-    ungroup() |>
-    mutate(Variante = 0)
+  no_years <- end - start + 1
 
-  df_end <- df |>
-    filter(Simulationsjahr == 2043L)
+  new_dat <- base_dat |>
+    mutate(variant = "v0")
 
-  # repeating 7 years
-  df_end <- map(seq_len(7), ~ df_end) |>
-    list_rbind() |>
-    arrange(area_code, area_name) |>
-    group_by(area_code, area_name, Variante) |>
-    # repeating 7 years x 2 sexes
-    slice(1:14)  |>
-    mutate(Simulationsjahr = rep(2044:2050, each = 2)) |>
-    ungroup()
-
-  df_out <- df_start |>
+  out_dat <- new_dat |>
     bind_rows(df) |>
-    bind_rows(df_end) |>
-    arrange(area_code, area_name, Variante)
+    arrange(area_code, area_name, variant)
 
-  return(df_out)
+  return(out_dat)
 }
 
 app_dat <- rep_years(app_dat)
 
-app_dat <- app_dat |>
-  mutate(across(starts_with("Bev"), \(x) round(x, digits = 3)))
+# make a list
+app_ls <- app_dat |> group_split(area_code, area_name)
+names(app_ls) <- unique(app_dat$area_code)
+
+# format df ready to save as JSON
+format_json <- function(df) {
+  df |>
+    nest(.by = c(starts_with("area"), variant, year), .key = "data") |>
+    mutate(data = map(
+      data, \(x) {
+        x |>
+          pivot_wider(names_from = mf, values_from = pop)
+      }
+    )) |>
+    # add totals
+    mutate(totals = map(
+      data, \(x) {
+        x |>
+          select(-age) |>
+          summarise(across(c(f, m), \(y) sum(y))) |>
+          jsonlite::unbox()
+      }
+    )) |>
+    relocate(data, .after = totals) |>
+    select(-area_name)
+}
+
+app_ls <- map(app_ls, \(x) format_json(x))
 
 # save ----
-app_dat |>
-  group_by(area_code, area_name) |>
-  group_walk(\(x, y) {
-    write_csv(
+walk2(
+  app_ls, names(app_ls),
+  \(x, y) {
+    jsonlite::write_json(
       x,
       here(
         "data",
         "app_inputs",
-        paste0("test_population_", y$area_code[[1]], ".csv")
+        "pyramids",
+        paste0(y, ".json")
       )
     )
-  })
+  }
+)
