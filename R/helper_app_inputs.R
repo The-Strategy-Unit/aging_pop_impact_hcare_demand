@@ -154,16 +154,22 @@ attach_params <- function(df) {
 
 # compute binning using pretty version of Freedman Diaconis rule
 pretty_fd <- function(x) {
-
-  brks <- pretty(range(x$end_p), n = nclass.FD(x$end_p), min.n = 1)
-  ints <- cut(x$end_p, breaks = brks, right = FALSE)
-
+  if (max(x$end_p) - min(x$end_p) < .1) {
+    brks <- pretty(range(x$end_p), n = 20, min.n = 1)
+    ints <- cut(x$end_p, breaks = brks, right = FALSE)
+  } else {
+    brks <- pretty(
+      range(x$end_p),
+      n = nclass.FD(x$end_p, digits = 5),
+      min.n = 1
+    )
+    ints <- cut(x$end_p, breaks = brks, right = FALSE)
+  }
   data <- tibble(
     x0 = head(brks, -1),
     x1 = tail(brks, -1),
-    freq = summary(ints)
+    freq = summary(ints, maxsum = 200)
   )
-
   return(data)
 }
 
