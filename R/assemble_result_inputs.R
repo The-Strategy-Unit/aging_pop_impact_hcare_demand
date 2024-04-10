@@ -128,7 +128,8 @@ format_json <- function(df_res) {
       end_p = 100 * end_p - 100,
       end_p_nohsa = 100 * end_p_nohsa - 100
     ) |>
-    select(pod, group, label, end_p, end_p_md, end_p_nohsa)
+    select(pod, group, label, end_p, end_p_md, end_p_nohsa) |>
+    arrange(pod, group)
 }
 
 res_ls <- map(res_ls, \(x) format_json(x))
