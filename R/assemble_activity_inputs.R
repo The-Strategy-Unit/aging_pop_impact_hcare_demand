@@ -139,7 +139,17 @@ format_json <- function(df_urt, df_gams) {
     ))
 }
 
-app_ls <- map2(app_ls, gams_ls, \(x, y) format_json(x, y))
+app_ls <- map2(
+  app_ls, gams_ls,
+  \(x, y) {
+    format_json(x, y)
+  },
+  .progress = list(
+    clear = TRUE,
+    format = "Format JSON files: {cli::pb_bar} {cli::pb_percent} | ETA: {cli::pb_eta}", # nolint: line_length_linter.
+    type = "iterator"
+  )
+)
 
 # save ----
 walk2(
