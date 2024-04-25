@@ -79,7 +79,8 @@ walk2(
   plot_ls, names(plot_ls),
   \(x, y) {
     ggsave(
-      here("data", "2022", y, "review_urt.png"),
+      here("data", "2022", y, paste0(y, "_review_urt.png")),
+      x,
       width = 400,
       height = 300,
       units = "mm"
