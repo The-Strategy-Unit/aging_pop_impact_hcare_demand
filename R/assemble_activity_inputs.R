@@ -38,7 +38,10 @@ act_dat <- bind_rows(aae_dat, apc_dat, opc_dat)
 urt_dat <- act_dat |>
   filter(hsagrp %in% hsagrps_app) |>
   left_join(pop_dat, join_by("area_code", "area_name", "sex", "age")) |>
-  mutate(urt = n / pop)
+  mutate(urt = n / pop) |>
+  left_join(hsagrp_labs, join_by("hsagrp")) |>
+  mutate(hsagrp = factor(hsagrp, levels = hsagrp_levels)) |>
+  arrange(area_code, area_name, hsagrp)
 
 # review ----
 # plot area rates alongside england rates
@@ -54,7 +57,7 @@ plot_urts <- function(urt_eng, urt_area) {
       show.legend = FALSE,
       data = urt_area
     ) +
-    facet_wrap(vars(group), scales = "free_y") +
+    facet_wrap(vars(hsagrp), scales = "free_y") +
     scale_color_manual(values = c("#fd484e", "#2c74b5"))
 }
 
@@ -114,10 +117,8 @@ format_json <- function(df_urt, df_gams) {
         rename(s = gam_rt),
       join_by(area_code, hsagrp, sex, age)
     ) |>
-    select(area_code, hsagrp, sex, age, urt, s) |>
-    left_join(hsagrp_labs, join_by("hsagrp")) |>
-    mutate(pod = str_sub(hsagrp, 1, 3), hsagrp = str_sub(hsagrp, 5, -1L)) |>
-    mutate(hsagrp = factor(hsagrp, levels = hsagrp_levels)) |>
+    select(area_code, hsagrp, hsagrp_lab, sex, age, urt, s) |>
+    left_join(lookup_pod, join_by(hsagrp)) |>
     rename(group = hsagrp, label = hsagrp_lab) |>
     nest(.by = c(starts_with("area"), pod, group, label), .key = "data") |>
     mutate(data = map(

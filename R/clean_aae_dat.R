@@ -21,11 +21,8 @@ aae_dat <- aae_dat |>
   filter(age >= 17) |>
   # set upper age group to 90+
   mutate(age = case_when(age >= 90 ~ 90, TRUE ~ as.double(age))) |>
-  rename(area_code = lacd) |>
-  mutate(
-    hsagrp = paste(sep = "_", "aae", arrmode),
-    across(c(age, n), as.integer)
-  ) |>
+  rename(area_code = lacd, hsagrp = arrmode) |>
+  mutate(across(c(age, n), as.integer)) |>
   group_by(area_code, sex, age, hsagrp) |>
   summarise(n = sum(n)) |>
   ungroup()

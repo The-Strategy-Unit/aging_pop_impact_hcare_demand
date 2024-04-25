@@ -27,10 +27,10 @@ apc_dat <- apc_dat |>
   summarise(n = sum(n), bds = sum(bds)) |>
   ungroup() |>
   pivot_longer(cols = c(n, bds), names_to = "units", values_to = "n") |>
-  mutate(hsagrp = paste(sep = "_", "apc", admigrp, units)) |>
+  mutate(hsagrp = paste(sep = "_", admigrp, units)) |>
   select(-admigrp) |>
   # omit daycase and regular attender beddays
-  filter(!hsagrp %in% c("apc_daycase_bds", "apc_reg_bds"))
+  filter(!hsagrp %in% c("daycase_bds", "reg_bds"))
 
 # reconcile local government changes ----
 # WARNING this can easily become a rabbit hole!

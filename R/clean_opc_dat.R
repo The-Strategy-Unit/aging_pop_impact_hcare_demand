@@ -33,7 +33,6 @@ opc_dat <- opc_dat |>
   mutate(type = ifelse(is_surg, "surg", "non-surg")) |>
   mutate(hsagrp = paste(
     sep = "_",
-    "opc",
     type,
     case_when(
       has_proc ~ "proc",

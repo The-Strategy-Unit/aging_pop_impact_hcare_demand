@@ -49,39 +49,56 @@ vars_levels <- c(
   "lhl"
 )
 
+lookup_vars_id <- tribble(
+  ~"proj_id", ~"vars_id",
+  "principal_proj", "v1",
+  "hpp", "v2",
+  "lpp", "v3",
+  "php", "v4",
+  "plp", "v5",
+  "var_proj_high_intl_migration", "v6",
+  "var_proj_low_intl_migration", "v7",
+  "hhh", "v8",
+  "lll", "v9",
+  "hlh", "v10",
+  "lhl", "v11"
+)
+
+vars_id_levels <- c(paste0("v", 0:11))
+
 # hsa groups
 hsagrps_app <- c(
-  "aae_amb",
-  "aae_walkin",
-  "apc_daycase_n",
-  "apc_emer_n",
-  "apc_emer_bds",
-  "apc_ordelec_n",
-  "apc_ordelec_bds",
-  "opc_non-surg_first",
-  "opc_non-surg_fup",
-  "opc_non-surg_proc",
-  "opc_surg_first",
-  "opc_surg_fup",
-  "opc_surg_proc"
+  "amb",
+  "walkin",
+  "daycase_n",
+  "emer_n",
+  "emer_bds",
+  "ordelec_n",
+  "ordelec_bds",
+  "non-surg_first",
+  "non-surg_fup",
+  "non-surg_proc",
+  "surg_first",
+  "surg_fup",
+  "surg_proc"
 )
 
 # hsa group labels
 hsagrp_labs <- tribble(
   ~"hsagrp", ~"hsagrp_lab",
-  "aae_amb", "Ambulance arrivals",
-  "aae_walkin", "Walk-in arrivals",
-  "apc_daycase_n", "Daycases",
-  "apc_emer_n", "Unplanned admissions",
-  "apc_emer_bds", "Unplanned bed days",
-  "apc_ordelec_n", "Elective admissions",
-  "apc_ordelec_bds", "Elective bed days",
-  "opc_non-surg_first", "First app. (non-surgical specialties)",
-  "opc_non-surg_fup", "Follow-up app. (non-surgical specialties)",
-  "opc_non-surg_proc", "Procedure (non-surgical specialties)",
-  "opc_surg_first", "First app. (surgical specialties)",
-  "opc_surg_fup", "Follow-up app. (surgical specialties)",
-  "opc_surg_proc", "Procedure (surgical specialties)"
+  "amb", "Ambulance arrivals",
+  "walkin", "Walk-in arrivals",
+  "daycase_n", "Daycases",
+  "emer_n", "Unplanned admissions",
+  "emer_bds", "Unplanned bed days",
+  "ordelec_n", "Elective admissions",
+  "ordelec_bds", "Elective bed days",
+  "non-surg_first", "First app. (non-surgical specialties)",
+  "non-surg_fup", "Follow-up app. (non-surgical specialties)",
+  "non-surg_proc", "Procedure (non-surgical specialties)",
+  "surg_first", "First app. (surgical specialties)",
+  "surg_fup", "Follow-up app. (surgical specialties)",
+  "surg_proc", "Procedure (surgical specialties)"
 )
 
 # hsa group levels
@@ -99,6 +116,23 @@ hsagrp_levels <- c(
   "non-surg_first",
   "surg_fup",
   "non-surg_fup"
+)
+
+lookup_pod <- tribble(
+  ~"hsagrp", ~"pod",
+  "walkin", "aae",
+  "amb", "aae",
+  "emer_n", "apc",
+  "emer_bds", "apc",
+  "daycase_n", "apc",
+  "ordelec_n", "apc",
+  "ordelec_bds", "apc",
+  "surg_proc", "opc",
+  "non-surg_proc", "opc",
+  "surg_first", "opc",
+  "non-surg_first", "opc",
+  "surg_fup", "opc",
+  "non-surg_fup", "opc"
 )
 
 # group-up results for sexes
