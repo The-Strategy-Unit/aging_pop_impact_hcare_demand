@@ -32,21 +32,24 @@ app_dat <- pop_dat |>
 
 # repeat years
 # I'm creating a new variant v0 that has population numbers for
-# 2010 to 2017. These data are historic so there are no variants
+# 2000 to 2017. These data are historic so there are no variants
 # Currently, I just duplicate 2018 data as a temporary placeholder
 # This will need updating with the true population numbers
-rep_years <- function(df, start = 2010, end = 2017) {
+rep_years <- function(df, start = 2000, end = 2017) {
   base_dat <- df |>
     filter(year == 2018L, variant == "v1")
 
-  no_years <- end - start + 1
-
   new_dat <- base_dat |>
-    mutate(variant = "v0")
+    mutate(variant = factor("v0", levels = vars_id_levels)) |>
+    group_by(across(c(everything(), -year, -pop))) |>
+    complete(year = start:end) |>
+    fill(pop, .direction = c("up")) |>
+    ungroup() |>
+    filter(year != 2018L)
 
   out_dat <- new_dat |>
     bind_rows(df) |>
-    arrange(area_code, area_name, variant)
+    arrange(area_code, area_name, variant, year, age)
 
   return(out_dat)
 }
