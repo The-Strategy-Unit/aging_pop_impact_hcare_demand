@@ -20,14 +20,15 @@ pop_dat <- read_rds(here("data", "app_pop_100_inputs.rds"))
 # assemble ----
 app_dat <- pop_dat |>
   filter(id %in% vars_app) |>
-  rename(variant = id, mf = sex) |>
+  left_join(lookup_vars_id, join_by(id == proj_id)) |>
+  rename(mf = sex, variant = vars_id) |>
   mutate(
-    variant = factor(variant, levels = vars_levels),
-    variant = paste0("v", as.integer(variant)),
+    variant = factor(variant, levels = vars_id_levels),
     # round population to integer
     pop = round(pop)
   ) |>
   # important
+  select(-id) |>
   arrange(area_code, area_name, variant, year, age)
 
 # repeat years

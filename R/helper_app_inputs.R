@@ -35,7 +35,7 @@ vars_app <- c(
 )
 
 # projection variant levels
-vars_levels <- c(
+proj_id_levels <- c(
   "principal_proj",
   "hpp",
   "lpp",
