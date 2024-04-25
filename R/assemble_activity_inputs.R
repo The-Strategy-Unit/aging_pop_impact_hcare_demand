@@ -98,7 +98,10 @@ if (rerun_gams) {
 }
 
 for (i in seq_along(area_codes)) {
-  x <- read_csv(here("data", base_yr, area_codes[i], "hsa_activity_rt_tbl.csv"))
+  x <- read_csv(
+    here("data", base_yr, area_codes[i], "hsa_activity_rt_tbl.csv"),
+    show_col_types = FALSE
+  )
   gams_ls[[i]] <- x
 }
 
