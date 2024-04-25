@@ -80,7 +80,17 @@ format_json <- function(df) {
     select(-area_name)
 }
 
-app_ls <- map(app_ls, \(x) format_json(x))
+app_ls <- map(
+  app_ls,
+  \(x) {
+    format_json(x)
+  },
+  .progress = list(
+    clear = TRUE,
+    format = "Format JSON files: {cli::pb_bar} {cli::pb_percent} | ETA: {cli::pb_eta}", # nolint: line_length_linter.
+    type = "iterator"
+  )
+)
 
 # save ----
 walk2(
