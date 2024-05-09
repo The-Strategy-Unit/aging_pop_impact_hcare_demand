@@ -15,10 +15,11 @@ library("tidyr")
 source(here("R", "helper_app_inputs.R"))
 
 # read ----
-pop_dat <- read_rds(here("data", "app_pop_100_inputs.rds"))
+pop_proj <- read_rds(here("data", "app_pop_100_inputs.rds"))
+pop_hist <- read_rds(here("data", "app_historic_pop_inputs.rds"))
 
 # assemble ----
-app_dat <- pop_dat |>
+pop_proj <- pop_proj |>
   filter(id %in% vars_app) |>
   left_join(lookup_vars_id, join_by(id == proj_id)) |>
   rename(mf = sex, variant = vars_id) |>
@@ -29,33 +30,19 @@ app_dat <- pop_dat |>
   ) |>
   # important
   select(-id) |>
-  arrange(area_code, area_name, variant, year, age)
+  arrange(area_code, area_name, variant, year, age) |>
+  # important! pre-2023 will be replaced by mid-year estimates
+  filter(year >= 2023L)
 
-# repeat years
-# I'm creating a new variant v0 that has population numbers for
-# 2000 to 2017. These data are historic so there are no variants
-# Currently, I just duplicate 2018 data as a temporary placeholder
-# This will need updating with the true population numbers
-rep_years <- function(df, start = 2000, end = 2017) {
-  base_dat <- df |>
-    filter(year == 2018L, variant == "v1")
+pop_hist <- pop_hist |>
+  rename(mf = sex) |>
+  mutate(
+    variant = factor("v0", levels = vars_id_levels),
+    # round population to integer
+    pop = round(pop)
+  )
 
-  new_dat <- base_dat |>
-    mutate(variant = factor("v0", levels = vars_id_levels)) |>
-    group_by(across(c(everything(), -year, -pop))) |>
-    complete(year = start:end) |>
-    fill(pop, .direction = c("up")) |>
-    ungroup() |>
-    filter(year != 2018L)
-
-  out_dat <- new_dat |>
-    bind_rows(df) |>
-    arrange(area_code, area_name, variant, year, age)
-
-  return(out_dat)
-}
-
-app_dat <- rep_years(app_dat)
+app_dat <- bind_rows(pop_hist, pop_proj)
 
 # make a list
 app_ls <- app_dat |> group_split(area_code, area_name)
