@@ -127,7 +127,12 @@ mye_eng <- mye_lad |>
   )
 
 # save ----
-historic_pop_inputs_ls <- list(mye_lad, mye_cty, mye_icb, mye_eng)
-names(historic_pop_inputs_ls) <- c("mye_lad", "mye_cty", "mye_icb", "mye_eng")
+mye_all <- bind_rows(
+  mye_lad,
+  mye_cty,
+  mye_icb,
+  mye_eng
+)
 
-write_rds(historic_pop_inputs_ls, here("data", "historic_pop_inputs_ls.rds"))
+# used as input to activity rates element in the app
+write_rds(mye_all, here("data", "app_historic_pop_inputs.rds"))
